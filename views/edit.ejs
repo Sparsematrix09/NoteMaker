@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Note - <%= note.title %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+    body {
+    background-image: url('/uploads/bck.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+  /* Apply transparency to content over it */
+    position: relative;
+    }
+
+    body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(255, 255, 255,0.2); /* White tint for softening */
+    z-index: -1; /* Behind the content */
+    }
+    </style>
+</head>
+<body class="bg-zinc-900 text-white min-h-screen p-10 font-sans">
+    
+    <div class="max-w-3xl mx-auto">
+        <!-- Page Title -->
+        <h1 class="text-4xl font-bold mb-6 text-center">
+            <span class="text-purple-500 font-semibold mb-2">✏️ Editing Note: </span><span class="text-blue-400"><%= note.title %></span>
+        </h1>
+
+        <!-- Edit Form -->
+        <form action="/edit/<%= note._id %>" method="POST" enctype="multipart/form-data" class="space-y-6">
+
+            <!-- Title input -->
+            <div>
+                <label for="title" class="block text-gray-800 font-semibold mb-2">Note Title:</label>
+                <input
+                    type="text"
+                    name="title"
+                    value="<%= note.title %>"
+                    required
+                    class="w-full p-4 bg-zinc-800 rounded-xl border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+            </div>
+
+            <!-- Content input -->
+            <div>
+                <label for="title" class="block text-gray-800 font-semibold mb-2">Details:</label>
+                <textarea
+                    name="details"
+                    class="w-full h-64 p-4 bg-zinc-800 rounded-xl border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    required><%= note.content %></textarea>
+            </div>
+
+            <!-- Reminder input -->
+            <div>
+                <label for="reminderAt" class="block text-gray-800 font-semibold mb-2">Reminder (optional):</label>
+                <input
+                    type="datetime-local"
+                    name="reminderAt"
+                    value="<%= note.reminderAt ? new Date(note.reminderAt).toISOString().slice(0, 16) : '' %>"
+                    class="w-full p-4 bg-zinc-800 rounded-xl border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+            </div>
+
+            <!-- Image Upload Section -->
+            <div>
+                <label for="image" class="block mb-2 text-gray-800 font-semibold">Update Image (optional):</label>
+                <input
+                    type="file"
+                    name="image"
+                    accept="image/*"
+                    class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                />
+                <input type="hidden" name="oldImage" value="<%= note.image %>">
+            </div>
+
+            <!-- Show Existing Image -->
+            <% if (note.image) { %>
+                <div class="mt-4">
+                    <p class="block mb-2 text-gray-800 font-semibold">Current image:</p>
+                    <img src="<%= note.image %>" alt="Note Image" class="rounded-lg max-w-full max-h-[300px] border border-zinc-700">
+                </div>
+            <% } %>
+
+            <div class="flex justify-between items-center pt-4">
+                <button
+                    type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition">
+                    💾 Save Changes
+                </button>
+                        <a href="/" class="text-purple-800 hover:underline mt-6 inline-flex items-center gap-2">
+                            <img src="/uploads/back.png" alt="Back" class="w-7 h-7"> Cancel
+                        </a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Note Maker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-image: url('/uploads/bck.jpg');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-position: center;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255, 255, 255,0.2);
+      z-index: -1;
+    }
+
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="bg-zinc-900 text-white font-sans">
+  
+  <div class="max-w-5xl mx-auto p-6 min-h-screen">
+    <div class="text-center py-4">
+      <div class="flex items-center justify-center gap-2">
+        <img src="/uploads/icon.jpg" alt="Note Maker Logo" class="w-20 h-20" />
+        <h1 class="text-3xl font-bold text-black">Note Maker</h1>
+      </div>
+    </div>
+
+    <!-- FLEX CONTAINER FOR FORM AND BUTTONS -->
+    <div class="flex flex-col md:flex-row gap-6 mb-10">
+      <!-- FORM (LEFT SIDE) -->
+      <div class="flex-1 bg-zinc-800 p-6 rounded-2xl shadow-lg">
+        <form action="/create" method="POST" enctype="multipart/form-data" class="space-y-4">
+          <input
+            type="text"
+            name="title"
+            placeholder="Note Title"
+            required
+            class="w-full px-4 py-3 rounded-lg bg-zinc-700 border border-zinc-600 placeholder-gray-400"
+          />
+          <textarea
+            name="details"
+            placeholder="Write your note here..."
+            rows="5"
+            required
+            class="w-full px-4 py-3 rounded-lg bg-zinc-700 border border-zinc-600 resize-none placeholder-gray-400"
+          ></textarea>
+          <label class="block text-gray-300 text-sm font-medium mb-1">Optional Image</label>
+          <input type="file" name="image" accept="image/*" class="file:bg-blue-600 file:text-white file:rounded-full file:px-4 file:py-2 file:font-semibold hover:file:bg-blue-700" />
+          <label class="block text-gray-300 text-sm font-medium mb-1">Optional Reminder</label>
+          <input
+            type="datetime-local"
+            name="reminderAt"
+            class="w-full px-4 py-2 rounded-lg bg-zinc-700 border border-zinc-600 text-gray-300"
+          />
+          <button
+            type="submit"
+            class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white py-3 px-6 rounded-full font-semibold shadow-md hover:shadow-lg transition transform hover:scale-105 active:scale-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          >
+            ➕ Create Note
+          </button>
+        </form>
+      </div>
+      
+      <!-- BUTTONS CARD (RIGHT SIDE) -->
+      <div
+  class="w-full md:w-80 bg-zinc-800 p-6 rounded-2xl shadow-xl flex flex-col gap-4 items-center border border-zinc-700"
+>
+  <form action="/youtube-summarize" method="POST" class="w-full space-y-3">
+    <button
+      type="submit"
+      class="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white py-3 px-6 rounded-full font-semibold text-lg shadow-sm transition hover:shadow-lg hover:scale-105 active:scale-100 focus:outline-none focus:ring-2 focus:ring-pink-400"
+    >
+      <svg
+        class="w-6 h-6"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.26a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+      </svg>
+      <span>YouTube Video Summarizer</span>
+    </button>
+
+    <!-- YouTube URL input -->
+    <input
+      type="url"
+      name="url"
+      placeholder="Enter YouTube video URL"
+      required
+      class="w-full px-4 py-3 rounded-lg bg-zinc-700 border border-zinc-600 placeholder-gray-400"
+    />
+  </form>
+</div>
+    </div>
+
+    <!-- Search -->
+    <form action="/" method="GET" class="mb-6">
+      <div class="flex gap-2">
+        <input
+          type="text"
+          name="search"
+          value="<%= searchQuery %>"
+          placeholder="Search notes..."
+          class="flex-grow px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700"
+        />
+        <button
+          type="submit"
+          class="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white px-4 py-2 rounded-lg font-semibold shadow-md hover:shadow-lg transition transform hover:scale-105 active:scale-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
+          🔍
+        </button>
+      </div>
+    </form>
+
+    <!-- Notes Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% if (notes && notes.length > 0) { %>
+        <% notes.forEach(note => { %>
+          <div
+            class="bg-zinc-800 rounded-2xl p-5 shadow-lg border border-zinc-700 flex flex-col justify-between note-card"
+            data-reminder="<%= note.reminderAt %>"
+            data-title="<%= note.title %>"
+          >
+            <div>
+              <% if (note.image) { %>
+                <img src="<%= note.image %>" class="mb-3 rounded-lg max-h-48 w-full object-cover" />
+              <% } %>
+
+              <h2 class="text-xl font-semibold mb-1 truncate"><%= note.title %></h2>
+
+              <p class="text-sm text-gray-300 line-clamp-3 mb-2"><%= note.preview || "No preview available." %></p>
+
+              <a
+                href="/read/<%= note._id %>"
+                class="inline-block bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold py-2 px-4 rounded-lg shadow transition"
+                >📖 Read</a
+              >
+
+              <a
+                href="/edit/<%= note._id %>"
+                class="inline-block bg-yellow-400 hover:bg-yellow-500 text-zinc-900 font-semibold py-2 px-4 rounded-lg shadow transition ml-4 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+                >✏️ Edit</a
+              >
+
+              <p class="text-xs text-gray-400 mt-3">
+                Created: <%= new Date(note.createdAt).toLocaleString() %><br />
+                Last updated:
+                <span class="relative-time" data-time="<%= note.updatedAt %>">...</span>
+              </p>
+
+              <% if (note.reminderAt) { %>
+                <p class="text-xs text-green-400 mt-1">⏰ Reminder: <%= new Date(note.reminderAt).toLocaleString() %></p>
+              <% } %>
+            </div>
+
+            <form action="/delete/<%= note._id %>" method="POST" onsubmit="return confirm('Delete this note?')" class="mt-4">
+              <button
+                type="submit"
+                class="w-full text-red-400 hover:text-white bg-red-500/20 hover:bg-red-600 py-2 rounded-lg transition font-medium"
+              >
+                🗑️ Delete
+              </button>
+            </form>
+
+            <form action="/summarize/<%= note._id %>" method="POST">
+              <button
+                type="submit"
+                class="text-purple-700 bg-purple-200 hover:bg-purple-300 focus:bg-purple-300 font-semibold rounded-lg px-4 py-2 transition shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-400 flex items-center gap-2"
+              >
+                🧠 Summarize
+              </button>
+            </form>
+
+            <!-- Download as PDF button -->
+            <button
+              type="button"
+              class="w-full mt-4 flex items-center justify-center gap-3 bg-gradient-to-r from-yellow-300 to-yellow-500 hover:from-yellow-400 hover:to-yellow-600 text-zinc-800 py-3 px-6 rounded-full font-semibold text-lg shadow-sm transition hover:shadow-lg hover:scale-105 active:scale-100 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+              data-note-id="<%= note._id %>"
+            >
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5" />
+              </svg>
+              <span>Download as PDF</span>
+            </button>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <p class="text-center text-zinc-400 col-span-full">No notes found.</p>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Timestamp & Reminder Script -->
+  <script>
+    function timeAgo(dateStr) {
+      const date = new Date(dateStr);
+      const seconds = Math.floor((new Date() - date) / 1000);
+      const intervals = [
+        { label: "year", seconds: 31536000 },
+        { label: "month", seconds: 2592000 },
+        { label: "day", seconds: 86400 },
+        { label: "hour", seconds: 3600 },
+        { label: "minute", seconds: 60 },
+        { label: "second", seconds: 1 },
+      ];
+
+      for (const i of intervals) {
+        const count = Math.floor(seconds / i.seconds);
+        if (count > 0) return `${count} ${i.label}${count > 1 ? "s" : ""} ago`;
+      }
+      return "just now";
+    }
+
+    // Update "Last updated" text
+    document.querySelectorAll(".relative-time").forEach((el) => {
+      const t = el.dataset.time;
+      el.textContent = timeAgo(t);
+    });
+
+    // Client-side Reminder Check
+    document.querySelectorAll(".note-card").forEach((card) => {
+      const reminder = card.dataset.reminder;
+      if (reminder) {
+        const reminderTime = new Date(reminder).getTime();
+        const now = new Date().getTime();
+        if (reminderTime - now <= 60000 && reminderTime > now) {
+          setTimeout(() => {
+            alert(`⏰ Reminder: "${card.dataset.title}" is due now!`);
+          }, reminderTime - now);
+        }
+      }
+    });
+
+    // Attach event listener to all Download as PDF buttons
+    document.querySelectorAll('button[data-note-id]').forEach((button) => {
+      button.addEventListener("click", function () {
+        const noteId = this.getAttribute("data-note-id");
+        window.location.href = `/notes/${noteId}/download-pdf`;
+      });
+    });
+  </script>
+</body>
+</html>

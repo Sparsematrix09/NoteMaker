@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= filename %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+    body {
+    background-image: url('/uploads/bck.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+  /* Apply transparency to content over it */
+    position: relative;
+    }
+
+    body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(255, 255, 255,0.2); /* White tint for softening */
+    z-index: -1; /* Behind the content */
+    }
+</style>
+</head>
+<body class="bg-zinc-900 text-white p-10 min-h-screen">
+    
+    <div class="max-w-3xl mx-auto">
+        <h1 class="text-4xl font-bold mb-6 text-black"><%= filename %></h1>
+
+        <div class="bg-zinc-800 p-6 rounded-lg shadow-lg">
+            <!-- Note Content -->
+            <pre class="whitespace-pre-wrap break-words text-white"><%= content %></pre>
+
+            <!-- Image -->
+            <% if (image) { %>
+                <div class="mt-6">
+                    <h2 class="text-xl font-semibold mb-2">Attached Image:</h2>
+                    <img src="<%= image %>" alt="Note Image" class="rounded-lg max-w-full max-h-[400px] border border-zinc-700">
+                </div>
+            <% } %>
+
+            <!-- Reminder -->
+            <% if (reminderAt) { %>
+                <div class="mt-6">
+                    <h2 class="text-xl font-semibold mb-2">🔔 Reminder Set:</h2>
+                    <p class="text-gray-300">
+                        <%= new Date(reminderAt).toLocaleString() %>
+                    </p>
+                </div>
+            <% } %>
+        </div>
+
+        <a href="/" class="text-purple-800 hover:underline mt-6 inline-flex items-center gap-2">
+         <img src="/uploads/back.png" alt="Back" class="w-7 h-7"> Back to Notes
+        </a>
+
+    </div>
+</body>
+</html>
